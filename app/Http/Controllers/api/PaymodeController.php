@@ -25,8 +25,8 @@ class PaymodeController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'name' => ['required', 'max:30', 'unique:paymodes,name,' . $id],
-            'observation' => ['required', 'max:255']
+            'name' => ['required', 'max:50', 'unique:paymodes,name,' . $id],
+            'observation' => ['required', 'max:2000']
         ]);
 
         if ($validate->fails()) {
