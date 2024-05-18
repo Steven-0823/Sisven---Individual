@@ -69,6 +69,17 @@ class CategoriaController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $validate = Validator::make($request->all(), [
+            'name' => ['required', 'max:30', 'unique:categorias'],
+            'description' => ['required', 'max:255']
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'msg' => 'Se produjo un error en la validación de la información.',
+                'statusCode' => 400
+            ]);
+        }
         $categoria = Categoria::find($id);
         $categoria -> name = $request -> name;
         $categoria -> description = $request-> description;

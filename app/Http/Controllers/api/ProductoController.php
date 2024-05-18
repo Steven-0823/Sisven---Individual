@@ -64,6 +64,20 @@ class ProductoController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $validate = Validator::make($request->all(), [
+            'name' => ['required', 'max:255'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'stock' => ['required', 'integer', 'min:0'],
+            'category_id' => ['required', 'integer', 'exists:categories,id']
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'msg' => 'Se produjo un error en la validación de la información.',
+                'statusCode' => 400,
+                'errors' => $validate->errors()
+            ]);
+        }
         $producto = Producto::find($id);
         $producto->name = $request->name;
         $producto->price = $request->price;

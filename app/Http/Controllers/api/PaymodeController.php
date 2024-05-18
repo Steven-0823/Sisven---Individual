@@ -66,6 +66,17 @@ class PaymodeController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $validate = Validator::make($request->all(), [
+            'name' => ['required', 'max:50', 'unique:paymodes,name,' . $id],
+            'observation' => ['required', 'max:2000']
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'msg' => 'Se produjo un error en la validación de la información.',
+                'statusCode' => 400
+            ]);
+        }
         $paymode = Paymode::find($id);
 
         $paymode->Name = $request->Name;

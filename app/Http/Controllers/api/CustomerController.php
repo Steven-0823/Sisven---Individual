@@ -74,6 +74,23 @@ class CustomerController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $validate = Validator::make($request->all(), [
+            'document_number' => ['required', 'unique:customers', 'max:20'],
+            'first_name' => ['required', 'max:50'],
+            'last_name' => ['required', 'max:50'],
+            'address' => ['required', 'max:255'],
+            'birthday' => ['required', 'date'],
+            'phone_number' => ['required', 'max:15'],
+            'email' => ['required', 'email', 'max:100']
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'msg' => 'Se produjo un error en la validación de la información.',
+                'statusCode' => 400,
+                'errors' => $validate->errors()
+            ]);
+        }
         $customer = new Customer();
         
         $customer->document_number = $request->document_number;
