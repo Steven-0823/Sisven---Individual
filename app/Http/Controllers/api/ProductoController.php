@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Producto;
+use App\Models\Categoria;
+use  Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class ProductoController extends Controller
@@ -12,7 +15,8 @@ class ProductoController extends Controller
      */
     public function index()
     {
-        //
+        $productos = DB::table('products')->get();
+        return json_encode(['productos'=>$productos]);
     }
 
     /**
@@ -20,7 +24,27 @@ class ProductoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validate = Validator::make($request->all(), [
+            'name' => ['required', 'max:255'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'stock' => ['required', 'integer', 'min:0'],
+            'category_id' => ['required', 'integer', 'exists:categories,id']
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'msg' => 'Se produjo un error en la validación de la información.',
+                'statusCode' => 400,
+                'errors' => $validate->errors()
+            ]);
+        }
+        $producto = new Producto();
+        $producto->name = $request->name;
+        $producto->price = $request->price;
+        $producto->stock = $request->stock;
+        $producto->category_id = $request->category_id;
+        $producto->save();
+        return json_encode(['productos'=>$productos]);
     }
 
     /**
@@ -28,7 +52,11 @@ class ProductoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $productos = Producto::find($id);
+        if(is_null($productos))
+        {
+            return abort(400);
+        };
     }
 
     /**
@@ -36,7 +64,14 @@ class ProductoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $producto = Producto::find($id);
+        $producto->name = $request->name;
+        $producto->price = $request->price;
+        $producto->stock = $request->stock;
+        $producto->category_id = $request->category_id;
+        $producto->save();
+    
+        return json_encode(['productos'=>$productos]);
     }
 
     /**
@@ -44,6 +79,12 @@ class ProductoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $producto = Producto::find($id);
+        $producto->delete();
+
+        $productos = DB::table('products')
+        ->orderBy('name')
+        ->get();
+        return json_encode(['productos'=>$productos]);
     }
 }
