@@ -15,7 +15,6 @@ class PaymodeController extends Controller
     public function index()
     {
         $paymodes = Paymode::all();
-        $paymodes =DB::table('paymode')->get();
         return json_encode( ['paymodes' => $paymodes]);
     }
 
@@ -23,78 +22,59 @@ class PaymodeController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $validate = Validator::make($request->all(), [
-            'name' => ['required', 'max:50', 'unique:paymodes,name,' . $id],
-            'observation' => ['required', 'max:2000']
-        ]);
+{
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:255',
+        'observation' => 'nullable|string',
+    ]);
 
-        if ($validate->fails()) {
-            return response()->json([
-                'msg' => 'Se produjo un error en la validación de la información.',
-                'statusCode' => 400
-            ]);
-        }
-        $paymode = new Paymode();
+    $paymode = new Paymode();
+    $paymode->name = $validatedData['name'];
+    $paymode->observation = $validatedData['observation'];
 
-        $paymode->Name = $request->Name;
-        $paymode->Observation = $request->Observation;
+    $paymode->save();
 
-        $paymode->save();
+    return response()->json(['paymode' => $paymode], 200);
+}
 
-        $paymodes = DB::table('paymode')
-            ->orderBy('id')
-            ->get();
-
-            return json_encode( ['paymodes' => $paymodes]);
-    }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show( $id)
     {
-        $paymodes = Paymode::find($id);
-        if(is_null($paymodes))
-        {
-            return abort(400);
-        };
+        $paymode = Paymode::find($id);
+        return json_encode( ['paymode' => $paymode]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        $validate = Validator::make($request->all(), [
-            'name' => ['required', 'max:50', 'unique:paymodes,name,' . $id],
-            'observation' => ['required', 'max:2000']
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'observation' => 'nullable|string',
         ]);
-
-        if ($validate->fails()) {
-            return response()->json([
-                'msg' => 'Se produjo un error en la validación de la información.',
-                'statusCode' => 400
-            ]);
-        }
+    
         $paymode = Paymode::find($id);
-
-        $paymode->Name = $request->Name;
-        $paymode->Observation = $request->Observation;
-
+    
+        if (!$paymode) {
+            return response()->json(['message' => 'Modo de pago no encontrado'], 404);
+        }
+    
+        $paymode->name = $validatedData['name'];
+        $paymode->observation = $validatedData['observation'];
         $paymode->save();
-
-        $paymodes = DB::table('paymode')
-            ->orderBy('id')
-            ->get();
-
-            return json_encode( ['paymodes' => $paymodes]);
+    
+        return response()->json(['paymode' => $paymode], 200);
     }
+    
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         $paymode = Paymode::find($id);
         $paymode->delete();

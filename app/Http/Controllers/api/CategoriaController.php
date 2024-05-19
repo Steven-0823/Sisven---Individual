@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Categoria;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CategoriaController extends Controller
 {
@@ -15,9 +16,7 @@ class CategoriaController extends Controller
     public function index()
     {
         $categorias = Categoria::all();
-        $categorias = DB::table('categories')->get();
         return json_encode(['categorias' => $categorias]);
-
     }
 
     /**
@@ -25,76 +24,44 @@ class CategoriaController extends Controller
      */
     public function store(Request $request)
     {
-        // $categoria = new Categoria();
-
-        // $categoria -> name = $request -> name;
-        // $categoria -> description = $request-> description;
-        // $categoria->save();
-
-        // return json_encode(['categorias' => $categorias]);
-
-        $validate = Validator::make($request->all(), [
-            'name' => ['required', 'max:30', 'unique:categorias'],
-            'description' => ['required', 'max:255']
-        ]);
-
-        if ($validate->fails()) {
-            return response()->json([
-                'msg' => 'Se produjo un error en la validación de la información.',
-                'statusCode' => 400
-            ]);
-        }
+       
         $categoria = new Categoria();
         $categoria->name = $request->name;
         $categoria->description = $request->description;
         $categoria->save();
 
-        return json_encode(['categorias' => $categorias]);
+        return  json_encode(['categoria' => $categoria]);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
+        
         $categoria = Categoria::find($id);
-        if(is_null($categoria))
-        {
-            return abort(400);
-        };
+        return json_encode(['categoria' => $categoria]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        $validate = Validator::make($request->all(), [
-            'name' => ['required', 'max:30', 'unique:categorias'],
-            'description' => ['required', 'max:255']
-        ]);
+        
 
-        if ($validate->fails()) {
-            return response()->json([
-                'msg' => 'Se produjo un error en la validación de la información.',
-                'statusCode' => 400
-            ]);
-        }
         $categoria = Categoria::find($id);
-        $categoria -> name = $request -> name;
-        $categoria -> description = $request-> description;
-        $categoria ->  save();
+        $categoria->name = $request->name;
+        $categoria->description = $request->description;
+        $categoria->save();
 
-        $categorias = DB::table('categories')
-        ->orderBy('name')
-        ->get();
-        return json_encode ( ['categorias' => $categorias]);
+        return json_encode(['categoria' => $categoria]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         $categoria = Categoria::find($id);
         $categoria->delete();
@@ -103,6 +70,6 @@ class CategoriaController extends Controller
         ->orderBy('name')
         ->get();
 
-        return json_encode ( ['categorias' => $categorias]);
+        return json_encode(['categoria' => $categoria]);
     }
 }
